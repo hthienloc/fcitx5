@@ -726,16 +726,8 @@ void IBusService::destroyDBus() {
 
 dbus::ObjectPath IBusFrontend::createInputContext(const std::string &args) {
     auto sender = currentMessage()->sender();
-
-    // The IBus protocol passes the client's application name as the first
-    // argument to CreateInputContext.  Use it directly when available so that
-    // input-method engines can implement per-application behaviour.
-    std::string programName = args;
-
-    // Fallback: ask the D-Bus daemon for the caller's PID and read the process
-    // name from /proc/<pid>/comm.  This covers clients that pass an empty
-    // string (e.g. some Qt / Electron apps).
-    if (programName.empty()) {
+    std::string name = args;
+    if (name.empty()) {
         auto msg = bus_->createMethodCall(
             "org.freedesktop.DBus", "/org/freedesktop/DBus",
             "org.freedesktop.DBus", "GetConnectionUnixProcessID");
@@ -747,14 +739,11 @@ dbus::ObjectPath IBusFrontend::createInputContext(const std::string &args) {
         }
         if (pid > 0) {
             std::ifstream comm("/proc/" + std::to_string(pid) + "/comm");
-            if (comm.is_open()) {
-                std::getline(comm, programName);
-            }
+            std::getline(comm, name);
         }
     }
-
     auto *ic = new IBusInputContext(icIdx++, instance_->inputContextManager(),
-                                    this, sender, programName);
+                                    this, sender, name);
     ic->setFocusGroup(instance_->defaultFocusGroup());
     return ic->path();
 }
