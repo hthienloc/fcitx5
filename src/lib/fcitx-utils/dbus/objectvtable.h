@@ -457,8 +457,9 @@ public:
             if (watcher.isValid()) {
                 watcher.get()->setCurrentMessage(nullptr);
             }
-            if (defer.callback()) {
-                defer.callback()(std::move(msg));
+            auto &cb = defer.callback();
+            if (cb) {
+                cb(std::move(msg));
             }
             return true;
         }

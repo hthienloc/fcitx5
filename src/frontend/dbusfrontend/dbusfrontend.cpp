@@ -601,7 +601,7 @@ InputMethod1::createInputContext(
         state->originalMsg = std::make_shared<dbus::Message>(std::move(originalMsg));
 
         *state->slotHolder = getPidMsgHolder->callAsync(
-            UINT64_MAX, [state](dbus::Message &reply) -> bool {
+            0, [state](dbus::Message &reply) -> bool {
                 // Transfer ownership out of slotHolder so the slot is released
                 // when this lambda returns (sd-bus holds its own reference
                 // while the callback is running, so this is safe).
